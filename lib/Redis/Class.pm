@@ -7,6 +7,50 @@ use warnings;
 use Moose;
 use namespace::autoclean;
 
+use Carp;
+
+has 'backend' => (
+    is => 'rw',
+    isa => 'Redis::Class::Backend',
+);
+
+has 'host' => (
+    is => 'rw',
+    isa => 'Str',
+    default => sub {
+        return '127.0.0.1';
+    },
+);
+
+has 'port' => (
+    is => 'rw',
+    isa => 'Int',
+    default => sub {
+        6379;
+    },
+);
+
+has 'socket' => (
+    is => 'rw',
+    isa => 'Str',
+);
+
+around BUILDARGS => sub {
+    my $orig = shift;
+    my $class = shift;
+ 
+    if ( @_ == 1 && ! ref $_[0] ) {
+        if ( $_[0] =~ m{^([^:]+):([0-9]+$)} ) {
+            my ($host, $port) = ($1, $2);
+            return $class->$orig( host => $host, port => $port );
+        } else {
+            return $class->$orig( host => $_[0] );
+        }
+    } else {
+        return $class->$orig(@_);
+    }
+};
+ 
 =head1 NAME
 
 Redis::Class - The great new Redis::Class!
