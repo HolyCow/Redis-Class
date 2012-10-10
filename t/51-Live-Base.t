@@ -1,14 +1,19 @@
 #!perl
 
 use Test::More;
-use Redis;
+use Try::Tiny;
 use Data::Dumper;
 
 use Redis::Class;
 
 my $pid = undef;
 
-if ( ! $ENV{'REDIS_TEST_HOST'} && ! $ENV{'REDIS_TEST_PORT'} ) {
+my $redis_pm = try {
+    require Redis;
+    1;
+};
+
+if ( ! $ENV{'REDIS_TEST_HOST'} && ! $ENV{'REDIS_TEST_PORT'} && $redis_pm ) {
     plan skip_all => 'Live Redis test';
     done_testing;
     exit;
