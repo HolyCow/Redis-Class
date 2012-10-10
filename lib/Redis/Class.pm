@@ -13,7 +13,7 @@ Redis::Class - The great new Redis::Class!
 
 =head1 VERSION
 
-Version 0.01
+Version 0.0001
 
 =cut
 
