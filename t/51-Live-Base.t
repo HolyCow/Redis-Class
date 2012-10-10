@@ -1,19 +1,21 @@
 #!perl
 
 use Test::More;
-
-BEGIN {
-    use_ok( 'Redis::Class' ) || print "Bail out!\n";
-}
-
-diag( "Testing Redis::Class $Redis::Class::VERSION, Perl $], $^X" );
-
-
 use Redis;
 use Data::Dumper;
 
-my $pid = fork();
-if (defined $pid && $pid == 0) {
+use Redis::Class;
+
+my $pid = undef;
+
+if ( ! $ENV{'REDIS_LIVE'} ) {
+    plan skip_all => 'Live Redis test';
+    done_testing;
+    exit;
+}
+
+$pid = fork();
+if ( defined $pid && $pid == 0 ) {
     # child
     exec('redis-server t/testing_files/redis.conf');
     exit 0;
@@ -27,9 +29,10 @@ my $redis_class = Redis::Class->new({
     redis_server => $redis,
 });
 
+ok(1);
 
 END{
-    kill 9, $pid;
+    kill 9, $pid if $pid;
 }
 
 done_testing();
