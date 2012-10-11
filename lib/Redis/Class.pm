@@ -68,26 +68,32 @@ our $VERSION = '0.0001';
 
 Quick summary of what the module does.
 
-Perhaps a little code snippet.
-
     use Redis::Class;
 
-    my $foo = Redis::Class->new();
-    ...
+    my $redis_class = Redis::Class->new({ 
+        host => '127.0.0.1', 
+        port => 6379
+    });
+    
+    $redis_class = Redis::Class->new( '127.0.0.1:6380' );
 
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+    $redis_class = Redis::Class->new( '127.0.0.1' );
 
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
+=head2 new
+
+Creates the Redis::Class object. Accepts a hashref of settings or a set of ordered arguments.
+
+TODO: Socket (Connect through unix socket)
+TODO: Authentication
+TODO: Timeout
+TODO: Database (Choose database, defaults to 0 for now)
+TODO: UTF8 (Encode to UTF8 to server, decode from UTF8 from server)
+TODO: Lazy (RedisDB setting, doesn't connect until command sent)
+TODO: Reconnect/Every (Redis.pm setting, how long to try to reconnect/how often)
 
 =cut
-
-sub function1 {
-}
 
 =head2 function2
 
