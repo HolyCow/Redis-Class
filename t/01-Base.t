@@ -1,11 +1,19 @@
 #!perl -T
 
-use Test::More tests => 1;
+use Test::More;
 
-BEGIN {
-    use_ok( 'Redis::Class' ) || print "Bail out!\n";
-}
+use Redis::Class;
+use Redis::Class::Backend;
 
-diag( "Testing Redis::Class $Redis::Class::VERSION, Perl $], $^X" );
 
+
+isa_ok( Redis::Class::Backend->new()->redis, 'Redis::Class::Backend::Redis' );
+
+isa_ok( Redis::Class::Backend->new({ backend => 'Redis' })->redis, 'Redis::Class::Backend::Redis' );
+
+#isa_ok( Redis::Class::Backend->new({ backend => 'RedisDB' })->redis, 'Redis::Class::Backend::RedisDB' );
+
+
+
+done_testing;
 
