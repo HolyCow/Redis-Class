@@ -11,6 +11,11 @@ use Redis::Class::Backend;
 
 use Carp;
 
+has 'backend' => (
+    is => 'rw',
+    isa => 'Str',
+);
+
 has 'host' => (
     is => 'rw',
     isa => 'Str',
@@ -58,8 +63,9 @@ sub _build_redis {
     my $self = shift;
 
     return Redis::Class::Backend->new(
-        server => $self->host,
-        port   => $self->port,
+        host    => $self->host,
+        port    => $self->port,
+        backend => $self->backend,
     );
 }
  
@@ -97,6 +103,7 @@ Quick summary of what the module does.
 
 Creates the Redis::Class object. Accepts a hashref of settings or a set of ordered arguments.
 
+TODO: Backend (which Redis module to use to connect)
 TODO: Socket (Connect through unix socket)
 TODO: Authentication
 TODO: Timeout

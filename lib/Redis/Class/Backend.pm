@@ -7,6 +7,77 @@ use warnings;
 use Moose;
 use namespace::autoclean;
 
+use Carp;
+use Try::Tiny;
+
+has 'backend' => (
+    is => 'rw',
+    isa => 'Str',
+);
+
+has 'host' => (
+    is => 'rw',
+    isa => 'Str',
+);
+
+has 'port' => (
+    is => 'rw',
+    isa => 'Int',
+);
+
+has 'socket' => (
+    is => 'rw',
+    isa => 'Str',
+);
+
+has 'redis' => (
+    is => 'rw',
+    lazy_build => 1,
+);
+
+has 'backends' => (
+    is => 'rw',
+    isa => 'ArrayRef',
+    default => sub {
+        [ 'Redis', 'RedisDB' ]
+    },
+);
+
+sub _build_redis {
+    my $self = shift;
+    
+    my $backend = undef;
+    
+    if ( $self->backend ) {
+        $backend = $self->backend;
+        eval "require $backend" or croak( "Specified module $backend cannot be found" );
+    } else {
+        foreach my $redis_module ( @{ $self->backends } ) {
+            next if $backend;
+            
+            eval "require $redis_module" or next;
+            
+            $backend = $redis_module;
+        }
+    }
+    
+    croak ( 'No supported Redis modules found. Searched for ' . join ', ',  @{ $self->backends } )
+        if ! $backend;
+        
+    my $backend_class = "Redis::Class::Backend::$backend";
+    
+    eval "require $backend_class" or croak( 'Redis module ' . $backend . ' found but ' . $backend_class . ' not loaded' );
+    
+    my $eval_string = "$backend_class->new({";
+
+    $eval_string .= " host => '" . $self->host . "'," if $self->host;
+    $eval_string .= " port => '" . $self->port . "'," if $self->port;
+    
+    $eval_string .= "})";
+
+    eval $eval_string or croak( 'Could not create backend object' );
+}
+
 =head1 NAME
 
 Redis::Class::Backend - Determines backend to use for Redis::Class
