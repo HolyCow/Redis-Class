@@ -7,12 +7,9 @@ use warnings;
 use Moose;
 use namespace::autoclean;
 
-use Carp;
+use Redis::Class::Backend;
 
-has 'backend' => (
-    is => 'rw',
-    isa => 'Redis::Class::Backend',
-);
+use Carp;
 
 has 'host' => (
     is => 'rw',
@@ -50,6 +47,21 @@ around BUILDARGS => sub {
         return $class->$orig(@_);
     }
 };
+
+has 'redis' => (
+    is  => 'ro',
+    isa => 'Redis::Class::Backend',
+    lazy_build => 1,
+);
+
+sub _build_redis {
+    my $self = shift;
+
+    return Redis::Class::Backend->new(
+        server => $self->host,
+        port   => $self->port,
+    );
+}
  
 =head1 NAME
 

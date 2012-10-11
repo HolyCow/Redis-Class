@@ -42,7 +42,7 @@ isa_ok( $redis_class = Redis::Class->new({ host => $ENV{'REDIS_TEST_HOST'}, port
 is( $redis_class->host, $ENV{'REDIS_TEST_HOST'}, 'Hostname correct' );
 is( $redis_class->port, $ENV{'REDIS_TEST_PORT'}, 'Port correct' );
 
-
+ok( $redis_class->redis, 'Connects to Redis server' );
 
 END{
     kill 9, $pid if $pid;
