@@ -7,6 +7,33 @@ use warnings;
 use Moose;
 use namespace::autoclean;
 
+use Redis;
+
+has 'redis' => (
+    is => 'rw',
+    isa => 'Redis',
+    lazy_build => 1,
+);
+
+sub _build_redis {
+    my $self = shift;
+
+    return Redis->new(
+        server => $self->host . ':' . $self->port,
+        reconnect => 60,
+    );
+}
+
+has 'host' => (
+    is => 'rw',
+    isa => 'Str',
+);
+
+has 'port' => (
+    is => 'rw',
+    isa => 'Int',
+);
+
 =head1 NAME
 
 Redis::Class::Backend::Redis - Redis::Class Interface to Redis.pm
@@ -25,20 +52,91 @@ our $VERSION = '0.0001';
 
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
+=head2 get
 
 =cut
 
-sub function1 {
+sub get {
+    my ( $self, $name ) = @_;
+    
+    return $self->redis->get( $name );
 }
 
-=head2 function2
+=head2 set
 
 =cut
 
-sub function2 {
+sub set {
+    my ( $self, $name, $value ) = @_;
+    
+    $self->redis->set( $name, $value );
+    
+    return 1;
 }
 
+=head2 exists
+
+=cut
+
+sub exists {
+    my ( $self, $name ) = @_;
+    
+    return 1 if $self->redis->exists( $name );
+    
+    return;
+}
+
+=head2 delete
+
+=cut
+
+sub delete {
+    my ( $self, $name ) = @_;
+    
+    $self->redis->del( $name );
+    
+    return 1;
+}
+
+=head2 expire
+
+=cut
+
+sub expire {
+    my ( $self, $name, $value ) = @_;
+    
+    return $self->redis->expire( $name, $value );
+}
+
+=head2 ttl
+
+=cut
+
+sub ttl {
+    my ( $self, $name ) = @_;
+    
+    return $self->redis->ttl( $name );
+}
+
+=head2 persist
+
+=cut
+
+sub persist {
+    my ( $self, $name ) = @_;
+    
+    return $self->redis->persist( $name );
+}
+
+=head2 type
+
+=cut
+
+sub type {
+    my ( $self, $name ) = @_;
+    
+    return $self->redis->type( $name );
+}
 =head1 AUTHOR
 
 Mike Beasterfeld, C<< <mike.beasterfeld at gmail.com> >>
