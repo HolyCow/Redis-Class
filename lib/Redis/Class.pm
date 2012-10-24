@@ -116,7 +116,7 @@ TODO: Reconnect/Every (Redis.pm setting, how long to try to reconnect/how often)
 
 =cut
 
-=head2 Key
+=head2 key
 
 Returns a Redis::Class::Key object.
 

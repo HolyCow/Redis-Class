@@ -39,57 +39,6 @@ has 'initialized' => (
     default => sub { 0 },
 );
 
-sub delete {
-    my $self = shift;
-    
-    return $self->redis->delete( $self->name );
-}
-
-sub exists {
-    my $self = shift;
-    
-    return $self->redis->exists( $self->name );
-}
-
-sub expire {
-    my ($self, $value) = @_;
-    
-    $self->expire_ttl( $value );
-    $self->set_expire;
-    
-    return 1;
-}
-
-sub set_expire {
-    my $self = shift;
-    
-    return $self->persist if ! $self->expire_ttl;
-    
-    return $self->redis->expire( $self->name, $self->expire_ttl );
-}
-
-sub ttl {
-    my $self = shift;
-    
-    my $ttl = $self->redis->ttl( $self->name );
-    
-    return if $ttl == -1;
-    
-    return $ttl;
-}
-
-sub persist {
-    my $self = shift;
-    
-    return $self->redis->persist( $self->name );
-}
-
-sub type {
-    my $self = shift;
-    
-    return $self->redis->type( $self->name );
-}
-
 =head1 NAME
 
 Redis::Class::Data
@@ -107,6 +56,103 @@ our $VERSION = '0.0001';
 Quick summary of what the module does.
 
     use Redis::Class;
+
+=head1 SUBROUTINES/METHODS
+
+=head2 delete
+
+Deletes the key and value from the database.
+
+=cut
+
+sub delete {
+    my $self = shift;
+    
+    return $self->redis->delete( $self->name );
+}
+
+=head2 exists
+
+Returns 1 if the key exists, undef if it does not.
+
+=cut
+
+sub exists {
+    my $self = shift;
+    
+    return $self->redis->exists( $self->name );
+}
+
+=head2 expire
+
+Sets the time-to-live for the object and the key.
+
+=cut
+
+sub expire {
+    my ($self, $value) = @_;
+    
+    $self->expire_ttl( $value );
+    $self->set_expire;
+    
+    return 1;
+}
+
+=head2 set_expire
+
+Sets the time-to-live of the key in seconds.
+
+=cut
+
+sub set_expire {
+    my $self = shift;
+    
+    return $self->persist if ! $self->expire_ttl;
+    
+    return $self->redis->expire( $self->name, $self->expire_ttl );
+}
+
+=head2 ttl
+
+Returns the time-to-live of the key.
+
+=cut
+
+sub ttl {
+    my $self = shift;
+    
+    my $ttl = $self->redis->ttl( $self->name );
+    
+    return if $ttl == -1;
+    
+    return $ttl;
+}
+
+=head2 persist
+
+Removes the expiration of a key.
+
+=cut
+
+sub persist {
+    my $self = shift;
+    
+    return $self->redis->persist( $self->name );
+}
+
+=head2 type
+
+Returns the type of the value associated with the key.
+
+=cut
+
+sub type {
+    my $self = shift;
+    
+    return $self->redis->type( $self->name );
+}
+
+
 
 =head1 AUTHOR
 
