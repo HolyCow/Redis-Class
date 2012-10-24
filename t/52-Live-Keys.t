@@ -2,6 +2,7 @@
 
 use Test::More;
 use Try::Tiny;
+use File::Slurp;
 
 use Redis::Class;
 
@@ -18,10 +19,17 @@ if ( ! $ENV{'REDIS_TEST_HOST'} && ! $ENV{'REDIS_TEST_PORT'} && $redis_pm ) {
     exit;
 }
 
+my $conf_template = read_file( 't/testing_files/redis.conf' );
+
+$conf_template =~ s{%%HOST%%}{$ENV{'REDIS_TEST_HOST'}};
+$conf_template =~ s{%%PORT%%}{$ENV{'REDIS_TEST_PORT'}};
+
+write_file( 't/testing_files/redis-test.conf', $conf_template );
+
 $pid = fork();
 if ( defined $pid && $pid == 0 ) {
     # child
-    exec('redis-server t/testing_files/redis.conf');
+    exec('redis-server t/testing_files/redis-test.conf');
     exit 0;
 }
 
@@ -105,4 +113,7 @@ END{
 
 done_testing;
 
+END{
+    unlink 't/testing_files/redis-test.conf' if -e 't/testing_files/redis-test.conf';
+}
 

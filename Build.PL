@@ -10,6 +10,8 @@ my $builder = Module::Build->new(
     dist_version_from   => 'lib/Redis/Class.pm',
     build_requires => {
         'Test::More' => 0,
+        'File::Slurp' => 0,
+        'Test::Exception::LessClever' => 0,
     },
     requires => {
         'perl' => 5.006,
