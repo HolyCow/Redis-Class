@@ -8,6 +8,8 @@ use Moose;
 use namespace::autoclean;
 
 use Redis::Class::Backend;
+use Redis::Class::Keys;
+use Redis::Class::Keys::String;
 
 use Carp;
 
@@ -114,11 +116,36 @@ TODO: Reconnect/Every (Redis.pm setting, how long to try to reconnect/how often)
 
 =cut
 
-=head2 function2
+=head2 key
+
+Returns a Redis::Class::Key object.
 
 =cut
 
-sub function2 {
+sub key {
+    my $self = shift;
+    my $name = shift;
+    
+    return Redis::Class::Keys->new({
+        name  => $name,
+        redis => $self->redis,
+    });
+}
+
+=head2 string
+
+Returns a Redis::Class::Key::String object.
+
+=cut
+
+sub string {
+    my $self = shift;
+    my $name = shift;
+    
+    return Redis::Class::Keys::String->new({
+        name  => $name,
+        redis => $self->redis,
+    });
 }
 
 =head1 AUTHOR

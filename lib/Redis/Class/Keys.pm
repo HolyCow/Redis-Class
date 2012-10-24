@@ -1,4 +1,4 @@
-package Redis::Class::Backend::Redis;
+package Redis::Class::Keys;
 
 use 5.006;
 use strict;
@@ -7,36 +7,41 @@ use warnings;
 use Moose;
 use namespace::autoclean;
 
-use Redis;
+use Carp;
+
+has 'name' => (
+    is => 'rw',
+    isa => 'Str',
+    required => 1,
+);
 
 has 'redis' => (
     is => 'rw',
-    isa => 'Redis',
-    lazy_build => 1,
+    isa => 'Redis::Class::Backend',
+    required => 1,
 );
 
-sub _build_redis {
-    my $self = shift;
-
-    return Redis->new(
-        server => $self->host . ':' . $self->port,
-        reconnect => 60,
-    );
-}
-
-has 'host' => (
+has 'expire_ttl' => (
     is => 'rw',
-    isa => 'Str',
+    isa => 'Maybe[Int]',
+    default => sub { 0 },
 );
 
-has 'port' => (
+has 'builder_coderef' => (
     is => 'rw',
-    isa => 'Int',
+    isa => 'CodeRef',
+    predicate => 'has_builder_coderef',
+);
+
+has 'initialized' => (
+    is => 'rw',
+    isa => 'Bool',
+    default => sub { 0 },
 );
 
 =head1 NAME
 
-Redis::Class::Backend::Redis - Redis::Class Interface to Redis.pm
+Redis::Class::Data
 
 =head1 VERSION
 
@@ -46,97 +51,109 @@ Version 0.0001
 
 our $VERSION = '0.0001';
 
-
 =head1 SYNOPSIS
 
+Quick summary of what the module does.
+
+    use Redis::Class;
 
 =head1 SUBROUTINES/METHODS
 
-=head2 get
-
-=cut
-
-sub get {
-    my ( $self, $name ) = @_;
-    
-    return $self->redis->get( $name );
-}
-
-=head2 set
-
-=cut
-
-sub set {
-    my ( $self, $name, $value ) = @_;
-    
-    $self->redis->set( $name, $value );
-    
-    return 1;
-}
-
-=head2 exists
-
-=cut
-
-sub exists {
-    my ( $self, $name ) = @_;
-    
-    return 1 if $self->redis->exists( $name );
-    
-    return;
-}
-
 =head2 delete
+
+Deletes the key and value from the database.
 
 =cut
 
 sub delete {
-    my ( $self, $name ) = @_;
+    my $self = shift;
     
-    $self->redis->del( $name );
+    return $self->redis->delete( $self->name );
+}
+
+=head2 exists
+
+Returns 1 if the key exists, undef if it does not.
+
+=cut
+
+sub exists {
+    my $self = shift;
     
-    return 1;
+    return $self->redis->exists( $self->name );
 }
 
 =head2 expire
 
+Sets the time-to-live for the object and the key.
+
 =cut
 
 sub expire {
-    my ( $self, $name, $value ) = @_;
+    my ($self, $value) = @_;
     
-    return $self->redis->expire( $name, $value );
+    $self->expire_ttl( $value );
+    $self->set_expire;
+    
+    return 1;
+}
+
+=head2 set_expire
+
+Sets the time-to-live of the key in seconds.
+
+=cut
+
+sub set_expire {
+    my $self = shift;
+    
+    return $self->persist if ! $self->expire_ttl;
+    
+    return $self->redis->expire( $self->name, $self->expire_ttl );
 }
 
 =head2 ttl
 
+Returns the time-to-live of the key.
+
 =cut
 
 sub ttl {
-    my ( $self, $name ) = @_;
+    my $self = shift;
     
-    return $self->redis->ttl( $name );
+    my $ttl = $self->redis->ttl( $self->name );
+    
+    return if $ttl == -1;
+    
+    return $ttl;
 }
 
 =head2 persist
 
+Removes the expiration of a key.
+
 =cut
 
 sub persist {
-    my ( $self, $name ) = @_;
+    my $self = shift;
     
-    return $self->redis->persist( $name );
+    return $self->redis->persist( $self->name );
 }
 
 =head2 type
 
+Returns the type of the value associated with the key.
+
 =cut
 
 sub type {
-    my ( $self, $name ) = @_;
+    my $self = shift;
     
-    return $self->redis->type( $name );
+    return $self->redis->type( $self->name );
 }
+
+
+
 =head1 AUTHOR
 
 Mike Beasterfeld, C<< <mike.beasterfeld at gmail.com> >>
@@ -146,8 +163,6 @@ Mike Beasterfeld, C<< <mike.beasterfeld at gmail.com> >>
 Please report any bugs or feature requests to C<bug-redis-class at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Redis-Class>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
 
 
 =head1 SUPPORT
@@ -196,4 +211,7 @@ See http://dev.perl.org/licenses/ for more information.
 
 =cut
 
+__PACKAGE__->meta->make_immutable;
+
 1; # End of Redis::Class
+

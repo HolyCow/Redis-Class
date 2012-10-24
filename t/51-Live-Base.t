@@ -49,6 +49,12 @@ is( $redis_class->port, $ENV{'REDIS_TEST_PORT'}, 'Port correct' );
 
 ok( $redis_class->redis, 'Connects to Redis server' );
 
+my $string = $redis_class->string( 'TestString' );
+
+$string->set( 'hello' );
+
+diag( $string->get );
+
 END{
     kill 9, $pid if $pid;
 }

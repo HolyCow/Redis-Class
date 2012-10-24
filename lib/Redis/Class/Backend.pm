@@ -12,7 +12,7 @@ use Try::Tiny;
 
 has 'backend' => (
     is => 'rw',
-    isa => 'Str',
+    isa => 'Maybe[Str]',
 );
 
 has 'host' => (
@@ -33,6 +33,12 @@ has 'socket' => (
 has 'redis' => (
     is => 'rw',
     lazy_build => 1,
+    handles => [
+        qw{ 
+            set get exists delete dump expire ttl expire_ttl persist type
+            
+        }
+    ],
 );
 
 has 'backends' => (
