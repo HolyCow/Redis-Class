@@ -1,4 +1,4 @@
-package Redis::Class::Keys;
+package Redis::Class::Server;
 
 use 5.006;
 use strict;
@@ -19,47 +19,9 @@ has 'redis' => (
     required => 1,
 );
 
-has 'expire' => (
-    is => 'rw',
-    isa => 'Int',
-    default => sub { 0 },
-);
-
-has 'builder_coderef' => (
-    is => 'rw',
-    isa => 'CodeRef',
-    predicate => 'has_builder_coderef',
-);
-
-has 'initialized' => (
-    is => 'rw',
-    isa => 'Bool',
-    default => sub { 0 },
-);
-
-sub delete {
-    my $self = shift;
-    
-    return $self->redis->delete( $self->name );
-}
-
-sub exists {
-    my $self = shift;
-    
-    return $self->redis->exists( $self->name );
-}
-
-sub expires {
-    my $self = shift;
-    
-    return 1 if ! $self->expire;
-    
-    return $self->redis->expire( $self->name, $self->expire );
-}
- 
 =head1 NAME
 
-Redis::Class::Data
+Redis::Class::Server
 
 =head1 VERSION
 
@@ -71,9 +33,9 @@ our $VERSION = '0.0001';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+This module will provide an interface to Redis server commands.
 
-    use Redis::Class;
+    use Redis::Class::Server;
 
 =head1 AUTHOR
 
