@@ -9,58 +9,9 @@ use namespace::autoclean;
 
 extends 'Redis::Class::Keys';
 
-sub set {
-    my ( $self, $value ) = @_;
-    
-    $self->redis->set( $self->name, $value );
-#    $self->expires;
-#    $self->initialized(1);
-    
-    return 1;
-}
-
-sub get {
-    my $self = shift;
-    
-#    $self->init;
-    
-    return $self->redis->get( $self->name );
-}
-
-sub increment {
-    my $self = shift;
-    
-    $self->redis->incr( $self->name ) if ! $self->init;
-    $self->expires;
-
-    return 1;
-}
-
-sub decrement {
-    my $self = shift;
-    
-    $self->redis->decr( $self->name ) if ! $self->init;
-    $self->expires;
-
-    return 1;
-}
-
-sub init {
-    my $self = shift;
-
-    if ( ( ! $self->initialized || ! $self->exists ) && $self->has_builder_coderef ) {
-        $self->delete if $self->exists;
-        $self->set( &{ $self->builder_coderef } );
-        return 1;
-    }
-    
-    return;
-}
-
- 
 =head1 NAME
 
-Redis::Class::Data::String - The great new Redis::Class!
+Redis::Class::Keys::String - The great new Redis::Class::Keys::String!
 
 =head1 VERSION
 
@@ -73,9 +24,9 @@ our $VERSION = '0.0001';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+Provides interface to keys that are strings.
 
-    use Redis::Class;
+    use Redis::Class::Keys::String;
 
 =head1 SUBROUTINES/METHODS
 
@@ -84,6 +35,84 @@ Quick summary of what the module does.
 Creates the Redis::Class object. Accepts a hashref of settings or a set of ordered arguments.
 
 =cut
+
+=head2 set
+
+Sets the value of a key to a string.
+
+=cut
+
+sub set {
+    my ( $self, $value ) = @_;
+    
+    $self->redis->set( $self->name, $value );
+#    $self->expires;
+#    $self->initialized(1);
+    
+    return 1;
+}
+
+=head2 get
+
+Returns the value of a string.
+
+=cut
+
+sub get {
+    my $self = shift;
+    
+#    $self->init;
+    
+    return $self->redis->get( $self->name );
+}
+
+=head2 increment
+
+Increments a string value by one.
+
+=cut
+
+sub increment {
+    my $self = shift;
+    
+    $self->redis->incr( $self->name ) if ! $self->init;
+    $self->expires;
+
+    return 1;
+}
+
+=head2 decrement
+
+Decrements a string value by one.
+
+=cut
+
+sub decrement {
+    my $self = shift;
+    
+    $self->redis->decr( $self->name ) if ! $self->init;
+    $self->expires;
+
+    return 1;
+}
+
+=head2 init
+
+Initializes the value of the string if it has expired or has not been initialized before and has a builder coderef.
+
+=cut
+
+sub init {
+    my $self = shift;
+
+    if ( ( ! $self->initialized || ! $self->exists ) && $self->has_builder_coderef ) {
+        $self->delete if $self->exists;
+        $self->set( &{ $self->builder_coderef } );
+        return 1;
+    }
+    
+    return;
+} 
 
 =head1 AUTHOR
 
